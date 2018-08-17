@@ -11,7 +11,7 @@ import nltk
 import csv
 import itertools
 import numpy as np
-from CreateRNN import RNNNumpy
+
 """
 We need to set certain variables here for use in the cleaning of the data set.
 The vocabulary_size limit imposed is in order to keep the training time down.
@@ -37,8 +37,8 @@ with open('Tutorial/rnn-tutorial-rnnlm/data/reddit-comments-2015-08.csv', 'r', e
         if row:
         # Split full comments into sentences
             sentences.append(nltk.sent_tokenize(row[0].lower()))
-sentences = itertools.chain(*sentences)
-sentences = ['{} {} {}'.format(sentence_start_token, x, sentence_end_token) for x in sentences]      
+    sentences = itertools.chain(*sentences)
+    sentences = ['{} {} {}'.format(sentence_start_token, x, sentence_end_token) for x in sentences]      
 print ("Parsed {} sentences.".format(len(sentences)))
 
 # Tokenize the sentences into words. We could use the re package here
@@ -68,15 +68,3 @@ print("\nExample sentence after Pre-processing: '{}'".format(tokenized_sentences
 # Create the training data
 X_train = np.asarray([[word_to_index[w] for w in sent[:-1]] for sent in tokenized_sentences])
 y_train = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized_sentences])
-
-np.random.seed(10)
-model = RNNNumpy(vocabulary_size)
-o, s = model.forward_propagation(X_train[10])
-
-predictions = model.predict(X_train[10])
-print(predictions.shape)
-print(predictions)
-
-predicted_words = [index_to_word[i] for i in predictions]
-predicted_sentence = " ".join(predicted_words)
-
