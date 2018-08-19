@@ -44,6 +44,29 @@ class RNNNumpy:
         
     
     def predict(self, x):
+        #Our prediciton is mearly a single forword propagation with our input
         o, s = self.forward_propagation(x)
+        #Once the weights have all been calculated with this FP, then we only
+        #need to return the index of the mostly likely word. Later this is combined
+        # with the index_to_words array in order to translate this into a word
         return np.argmax(o, axis=1)
+      
+    def calculate_total_loss(self, x, y):
+        L = 0
+        # For each sentence in our input matrix x (each sentence)
+        for i in np.arange(len(y)):
+            # Calculate the forward_propagation matrices o, s for each setence
+            o, s = self.forward_propagation(x[i])
+            # Now we need to select only the parts of our o matrix
+            # where the 'correct' words lay as only they are used to calculate
+            # the loss
+            correct_word_predictions = o[np.arange(len(y[i])), y[i]]
+            # Add to the loss based on how off we were in our predictions
+            L += -1 * np.sum(np.log(correct_word_predictions))
+        return L
+ 
+    def calculate_loss(self, x, y):
+        # Divide the total loss by the number of training examples
+        N = np.sum((len(y_i) for y_i in y))
+        return self.calculate_total_loss(x,y)/N
 
