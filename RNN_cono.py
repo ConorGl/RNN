@@ -12,6 +12,8 @@ import csv
 import itertools
 import numpy as np
 from CreateRNN import RNNNumpy
+nltk.download('punkt')
+
 """
 We need to set certain variables here for use in the cleaning of the data set.
 The vocabulary_size limit imposed is in order to keep the training time down.
@@ -71,12 +73,21 @@ y_train = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized
 
 np.random.seed(10)
 model = RNNNumpy(vocabulary_size)
-o, s = model.forward_propagation(X_train[10])
 
+"""
+We can use the below code in order to a quick 'test' to see what the output of our RNN would be.
+It currently only spits out gobbledy-gook....
+
+o, s = model.forward_propagation(X_train[10])
 predictions = model.predict(X_train[10])
 print(predictions.shape)
 print(predictions)
 
 predicted_words = [index_to_word[i] for i in predictions]
 predicted_sentence = " ".join(predicted_words)
+
+print("Expected Loss for random predictions: {}".format(np.log(vocabulary_size)))
+print("Actual loss:{}".format(model.calculate_loss(X_train[:1000], y_train[:1000])))
+"""
+
 
