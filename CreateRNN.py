@@ -8,6 +8,7 @@ We will create the class RNNTheano, which will be an RNN
 """
 import numpy as np
 import Functions as fn
+import operator
 
 class RNNNumpy:
     def __init__(self, word_dim, hidden_dim=100, bptt_truncate=4):
@@ -124,15 +125,50 @@ class RNNNumpy:
                 # calculate The relative error: (|x - y|/(|x| + |y|))
                 relative_error = np.abs(backprop_gradient - estimated_gradient)/(np.abs(backprop_gradient) + np.abs(estimated_gradient))
                 # If the error is to large fail the gradient check
-                if relative_error &gt; error_threshold:
+                if relative_error > error_threshold:
                     print("Gradient Check ERROR: parameter={} ix={}".format(pname, ix))
                     print("+h Loss: {}".format(gradplus))
                     print("-h Loss: {}".format(gradminus))
-                    print("Estimated_gra1dient: {}".format(estimated_gradient))
+                    print("Estimated_gradient: {}".format(estimated_gradient))
                     print("Backpropagation gradient: {}".format(backprop_gradient))
                     print("Relative Error: {}".format(relative_error))
                     return
                 it.iternext()
             print("Gradient check for parameter {} passed.".format(pname))
-        
-model = RNNNumpy(8000)
+            
+    def numpy_sdg_step(self, x, y, learning_rate):
+        # Calculate the gradients
+        dLdU, dLdV, dLdW = self.bptt(x, y)
+        # Change parameters according to gradients and learning rate
+        self.U -= learning_rate * dLdU
+        self.V -= learning_rate * dLdV
+        self.W -= learning_rate * dLdW
+    
+    # Outer SGD Loop
+    # - model: The RNN model instance
+    # - X_train: The training data set
+    # - y_train: The training data labels
+    # - learning_rate: Initial learning rate for SGD
+    # - nepoch: Number of times to iterate through the complete dataset
+    # - evaluate_loss_after: Evaluate the loss after this many epochs
+    def train_with_sgd(model, X_train, y_train, learning_rate=0.005, nepoch=100, evaluate_loss_after=5):
+        # We keep track of the losses so we can plot them later
+        losses = []
+        num_examples_seen = 0
+        for epoch in range(nepoch):
+            # Optionally evaluate the loss
+            if (epoch % evaluate_loss_after == 0):
+                loss = model.calculate_loss(X_train, y_train)
+                losses.append((num_examples_seen, loss))
+                time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                print.(f'"%s: Loss after num_examples_seen=%d epoch=%d: %f" % (time, num_examples_seen, epoch, loss)
+                # Adjust the learning rate if loss increases
+                if (len(losses) &gt; 1 and losses[-1][1] &gt; losses[-2][1]):
+                    learning_rate = learning_rate * 0.5 
+                    print "Setting learning rate to %f" % learning_rate
+                sys.stdout.flush()
+            # For each training example...
+            for i in range(len(y_train)):
+                # One SGD step
+                model.sgd_step(X_train[i], y_train[i], learning_rate)
+                num_examples_seen += 1
